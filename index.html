@@ -57,7 +57,7 @@
     <form onsubmit="event.preventDefault(); submitSteps();">
 		<input type="text" id="tel" name="username" autocomplete="username" placeholder="请输入账号" required />
 		<input type="password" id="psw" name="password" autocomplete="current-password" placeholder="请输入密码" required />
-		<input type="number" id="step" name="step" placeholder="目标步数 (3000-4000随机)" />
+		<input type="number" id="step" name="step" autocomplete="off" placeholder="目标步数 (3000-4000随机)" />
 		<button type="submit" id="submitBtn">一键提交</button>
 	</form>
     <div id="log"></div>
@@ -88,31 +88,34 @@
         document.getElementById('step').value = randomStep;
     }
 
+    // --- 新增：将生成随机步数的逻辑独立成一个函数 ---
+    function generateRandomStep() {
+        const randomStep = Math.floor(Math.random() * (4000 - 3000 + 1)) + 3000;
+        document.getElementById('step').value = randomStep;
+    }
+
     // 1. 页面初次加载时执行
     document.addEventListener('DOMContentLoaded', function() {
-        // 初始化随机步数
         generateRandomStep();
-
-        // 从浏览器的 localStorage 中读取上次保存的账号和密码并静默填充
+        
         const savedTel = localStorage.getItem('auto_step_tel');
         const savedPsw = localStorage.getItem('auto_step_psw');
-        if (savedTel) {
-            document.getElementById('tel').value = savedTel;
-        }
-        if (savedPsw) {
-            document.getElementById('psw').value = savedPsw;
+        if (savedTel) document.getElementById('tel').value = savedTel;
+        if (savedPsw) document.getElementById('psw').value = savedPsw;
+    });
+
+    // 2. 监听网页从后台切回前台的事件 (针对切后台)
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+            generateRandomStep();
+            document.getElementById('log').innerText = ''; 
         }
     });
 
-    // --- 新增：2. 监听网页从后台切回前台的事件 ---
-    document.addEventListener('visibilitychange', function() {
-        // 当网页再次变为可见状态时，重新生成一次随机步数
-        if (document.visibilityState === 'visible') {
-            generateRandomStep();
-            
-            // 可选：切回来时清空一下之前的日志提示，保持界面清爽
-            document.getElementById('log').innerText = ''; 
-        }
+    // --- 新增：3. 监听浏览器标签页恢复事件 (针对彻底关闭后重新打开) ---
+    window.addEventListener('pageshow', function(event) {
+        // 无论是不是从缓存恢复的，都强制重新摇一次步数
+        generateRandomStep();
     });
 
     async function submitSteps() {
