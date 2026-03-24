@@ -54,14 +54,26 @@
 
 <div class="card">
     <h2>运动步数同步</h2>
-    <input type="text" id="tel" placeholder="请输入账号" />
-    <input type="password" id="psw" placeholder="请输入密码" />
-    <input type="number" id="step" placeholder="目标步数 (0-100000)" value="3275" />
-    <button id="submitBtn" onclick="submitSteps()">一键提交</button>
+    <form onsubmit="event.preventDefault(); submitSteps();">
+		<input type="text" id="tel" name="username" autocomplete="username" placeholder="请输入账号" required />
+		<input type="password" id="psw" name="password" autocomplete="current-password" placeholder="请输入密码" required />
+		<input type="number" id="step" name="step" placeholder="目标步数 (3000-4000随机)" />
+		<button type="submit" id="submitBtn">一键提交</button>
+	</form>
     <div id="log"></div>
 </div>
 
 <script>
+	// 监听网页加载完成事件
+	document.addEventListener('DOMContentLoaded', function() {
+		// 生成 3000 到 4000 之间的随机整数
+		// 公式: Math.floor(Math.random() * (最大值 - 最小值 + 1)) + 最小值
+		const randomStep = Math.floor(Math.random() * (4000 - 3000 + 1)) + 3000;
+		
+		// 找到步数输入框，并把随机数填进去
+		document.getElementById('step').value = randomStep;
+	});
+	
     // 还原完整的动态密钥
     function getFullKey() {
         const baseArr = ['fanTui2024', 'SecretKey', '1234567890', '1234567890', '1234567890', '1234567890'];
