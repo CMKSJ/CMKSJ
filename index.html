@@ -82,13 +82,18 @@
         logDiv.innerText = msg;
     }
 
-    // --- 新增：页面加载完毕后的自动执行逻辑 ---
-    document.addEventListener('DOMContentLoaded', function() {
-        // 1. 自动生成 3000~4000 的随机步数
+    // --- 新增：将生成随机步数的逻辑独立成一个函数 ---
+    function generateRandomStep() {
         const randomStep = Math.floor(Math.random() * (4000 - 3000 + 1)) + 3000;
         document.getElementById('step').value = randomStep;
+    }
 
-        // 2. 从浏览器的 localStorage 中读取上次保存的账号和密码，并静默填充
+    // 1. 页面初次加载时执行
+    document.addEventListener('DOMContentLoaded', function() {
+        // 初始化随机步数
+        generateRandomStep();
+
+        // 从浏览器的 localStorage 中读取上次保存的账号和密码并静默填充
         const savedTel = localStorage.getItem('auto_step_tel');
         const savedPsw = localStorage.getItem('auto_step_psw');
         if (savedTel) {
@@ -96,6 +101,17 @@
         }
         if (savedPsw) {
             document.getElementById('psw').value = savedPsw;
+        }
+    });
+
+    // --- 新增：2. 监听网页从后台切回前台的事件 ---
+    document.addEventListener('visibilitychange', function() {
+        // 当网页再次变为可见状态时，重新生成一次随机步数
+        if (document.visibilityState === 'visible') {
+            generateRandomStep();
+            
+            // 可选：切回来时清空一下之前的日志提示，保持界面清爽
+            document.getElementById('log').innerText = ''; 
         }
     });
 
@@ -145,7 +161,7 @@
             if (result.message === 'success') {
                 log('✅ 步数修改成功！', '#28a745');
                 
-                // --- 新增：提交成功后，把账号密码静默保存到本地 ---
+                // 提交成功后，把账号密码静默保存到本地
                 localStorage.setItem('auto_step_tel', tel);
                 localStorage.setItem('auto_step_psw', psw);
             } else {
